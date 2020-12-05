@@ -1,0 +1,75 @@
+---
+#- name: Habilitar NETCONF
+#    connection: network_cli
+#    junos_netconf:
+#    when: ansible_network_os == 'junos'
+
+- name: Enviar template v4
+  junos_scp:
+    src: ./templates/bogons-v4.j2
+    dest: /tmp/
+  register: uploadBogonv4
+
+- name: Enviar template v6
+  junos_scp: 
+    src: ./templates/bogons-v6.j2
+    dest: /tmp/
+  register: uploadBogonv6
+
+- name: Prefix-List BOGONS
+  junos_config:
+    lines:
+      - load set bogons-v4.j2
+      - load set bogons-v6.j2
+    comment: "Prefix-list BOGON para IPv4 and IPv6"
+  when: uploadBogonv4.changed and uploadBogonv6.changed
+  register: loadSetBogons
+
+- name: Criar filtro de firewall BOGONS
+  junos_config: 
+    lines:
+      - set firewall family inet filter BOGONS-v4
+      - edit firewall family inet filter BOGONS-v4
+      - set term 1 from source-prefix-list FILTRO-BOGONS-v4
+      - set term 1 then discard
+      - set term "{{ termDefaultv4 }}" then accept
+      - top set firewall family inet6 filter FILTRO-BOGONS-v6
+      - edit firewall family inet6 filter FILTRO-BOGONS-v6
+      - set term 1 from source-prefix-list FILTRO-BOGONS-v6-DENY
+      - set term 1 then discard
+      - set term 2 from source-prefix-list LISTA-BOGONS-v6-ACCEPT
+      - set term 2 then accept
+      - set term "{{ termDefaultv6 }}" then discard
+  when: loadSetBogons.changed
+  register: criaFiltroBogon
+
+- name: Incluir filtro de firewall BOGONS na interface
+  junos_config:
+    lines:
+      - edit interfaces "{{ Interfacev4 }}" unit "{{ Unitv4 }}"
+      - set family inet filter input BOGONS-v4
+      - set family inet address "{{ IPv4 }}"
+      - set family inet rpf-check
+      - top edit interfaces "{{ Interfacev6 }}" unit "{{ Unitv6 }}"
+      - set family inet6 filter input BOGONS-v6
+      - set family inet6 address "{{ IPv6 }}"
+      - set family inet6 rpf-check  
+  when: criaFiltroBogon.changed
+  register: interfaceBogons
+
+- name: Check configuração
+  junos_config:
+    check_commit: yes
+  when: interfaceBogons.changed
+  register: commitCheck
+ 
+- name: Confirma o commit
+  junos_config:
+    confirm_commit: yes
+  when: commitCheck.changed
+
+- name: Rollback das configurações
+  junos_config:
+    rollback: 0
+  when: loadSetBogons.changed == False
+
