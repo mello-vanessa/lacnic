@@ -4,5 +4,12 @@
 #ansible_network_os=junos
 #ansible_user=ansible
 #ansible_password=!vault |
-
+termDefaultv4=
+termDefaultv6=
+Interfacev4=
+Unitv4 =
+IPv4=
+Interfacev6= 
+Unitv6= 
+IPv6= 
 
