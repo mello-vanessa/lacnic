@@ -1,4 +1,4 @@
-- hosts: localhost
+- hosts: juniper
   connection: local
   gather_facts: no
   roles:
