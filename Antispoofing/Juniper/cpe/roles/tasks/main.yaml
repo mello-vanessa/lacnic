@@ -25,7 +25,7 @@
   when: uploadBogonv4.changed and uploadBogonv6.changed
   register: loadSetBogons
 
-# Filtro de proteção porta 25, bogons e RA IPv6
+# Filtro de proteção porta 25, bogons
 - name: Criar filtro de firewall
   junos_config: 
     lines:
