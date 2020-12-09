@@ -1,0 +1,11 @@
+#Cisco 
+[cisco]
+server_name key=value
+
+#Juniper
+[juniper]
+server_name key=value
+
+#Mikrotik
+[mikrotik]
+server_name key=value
