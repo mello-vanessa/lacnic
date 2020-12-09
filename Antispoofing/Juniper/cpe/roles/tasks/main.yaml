@@ -25,25 +25,37 @@
   when: uploadBogonv4.changed and uploadBogonv6.changed
   register: loadSetBogons
 
-- name: Criar filtro de firewall BOGONS
+# Filtro de proteção porta 25, bogons e RA IPv6
+- name: Criar filtro de firewall
   junos_config: 
     lines:
       - set firewall family inet filter BOGONS-v4
       - edit firewall family inet filter BOGONS-v4
-      - set term 1 from source-prefix-list FILTRO-BOGONS-v4
+      - set term 1 from address 0.0.0.0/0 
+      - set term 1 from protocol tcp
+      - set term 1 from port smtp
       - set term 1 then discard
+      - set term 2 from source-prefix-list FILTRO-BOGONS-v4
+      - set term 2 then discard
       - set term "{{ termDefaultv4 }}" then accept
       - top set firewall family inet6 filter FILTRO-BOGONS-v6
       - edit firewall family inet6 filter FILTRO-BOGONS-v6
-      - set term 1 from source-prefix-list FILTRO-BOGONS-v6-DENY
+      - set term 1 from address ::/0
+      - set term 1 from next-header tcp
+      - set term 1 from port smtp
       - set term 1 then discard
-      - set term 2 from source-prefix-list LISTA-BOGONS-v6-ACCEPT
-      - set term 2 then accept
+      - set term 2 from source-prefix-list FILTRO-BOGONS-v6-DENY
+      - set term 2 then discard
+      - set term 3 from icmp-type 134
+      - set term 3 from icmp-code 0
+      - set term 3 then discard
+      - set term 4 from source-prefix-list LISTA-BOGONS-v6-ACCEPT
+      - set term 4 then accept
       - set term "{{ termDefaultv6 }}" then discard
   when: loadSetBogons.changed
-  register: criaFiltroBogon
+  register: criaFiltroFirewall
 
-- name: Incluir filtro de firewall BOGONS na interface
+- name: Incluir filtro de firewall na interface
   junos_config:
     lines:
       - edit interfaces "{{ Interfacev4 }}" unit "{{ Unitv4 }}"
@@ -54,13 +66,13 @@
       - set family inet6 filter input BOGONS-v6
       - set family inet6 address "{{ IPv6 }}"
       - set family inet6 rpf-check  
-  when: criaFiltroBogon.changed
-  register: interfaceBogons
+  when: criaFiltroFirewall.changed
+  register: interfaceFirewall
 
 - name: Check configuração
   junos_config:
     check_commit: yes
-  when: interfaceBogons.changed
+  when: interfaceFirewall.changed
   register: commitCheck
  
 - name: Confirma o commit
@@ -71,5 +83,5 @@
 - name: Rollback das configurações
   junos_config:
     rollback: 0
-  when: loadSetBogons.changed == False
+  when: interfaceFirewall.changed == False
 
