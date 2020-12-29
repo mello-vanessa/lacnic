@@ -37,7 +37,7 @@
       - set term 1 then discard
       - set term 2 from source-prefix-list FILTRO-BOGONS-v4
       - set term 2 then discard
-      - set term "{{ termDefaultv4 }}" then accept
+      - set term Default then accept
       - top set firewall family inet6 filter FILTRO-v6
       - edit firewall family inet6 filter FILTRO-v6
       - set term 1 from address ::/0
@@ -48,7 +48,7 @@
       - set term 2 then discard
       - set term 3 from source-prefix-list LISTA-BOGONS-v6-ACCEPT
       - set term 3 then accept
-      - set term "{{ termDefaultv6 }}" then discard
+      - set term Default then discard
   when: loadSetBogons.changed
   register: criaFiltroFirewall
 
@@ -57,11 +57,9 @@
     lines:
       - edit interfaces "{{ Interfacev4 }}" unit "{{ Unitv4 }}"
       - set family inet filter input FILTRO-v4
-      - set family inet address "{{ IPv4 }}"
       - set family inet rpf-check
       - top edit interfaces "{{ Interfacev6 }}" unit "{{ Unitv6 }}"
       - set family inet6 filter input FILTRO-v6
-      - set family inet6 address "{{ IPv6 }}"
       - set family inet6 rpf-check  
   when: criaFiltroFirewall.changed
   register: interfaceFirewall
