@@ -1,0 +1,10 @@
+edit policy-options prefix-list FILTRO-BOGONS-v6-DENY
+set 2001:db8::/32
+annotate 2001:db8::/32 "Faixa de enderecos reservado para documentação"
+edit policy-options prefix-list FILTRO-BOGONS-v6-ACCEPT
+set 2000::/3
+annotate 2000::/3 "Faixa de endereços dos enderecos globais"
+set 2000::/3
+annotate fe80::/64 "Faixa de endereços dos enderecos link local"
+set ::/128
+annotate ::/128 "Endereco não especificado"

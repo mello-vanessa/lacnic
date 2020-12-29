@@ -6,21 +6,25 @@
 
 - name: Enviar template v4
   junos_scp:
-    src: ./templates/bogons-v4.j2
+    provider: "{{ connection_info }}"
+    src: roles/cpe/templates/bogons-v4.j2
     dest: /tmp/
   register: uploadBogonv4
 
 - name: Enviar template v6
   junos_scp: 
-    src: ./templates/bogons-v6.j2
+    provider: "{{ connection_info }}"
+    src: roles/cpe/templates/bogons-v6.j2
     dest: /tmp/
   register: uploadBogonv6
 
 - name: Prefix-List BOGONS
   junos_config:
+    provider: "{{ connection_info }}"
     lines:
-      - load set bogons-v4.j2
-      - load set bogons-v6.j2
+      - show | compare rollback 0
+      - load set /tmp/bogons-v4.j2
+      - load set /tmp/bogons-v6.j2
     comment: "Prefix-list BOGON para IPv4 and IPv6"
   when: uploadBogonv4.changed and uploadBogonv6.changed
   register: loadSetBogons
@@ -28,6 +32,7 @@
 # Filtro de proteção porta 25, bogons
 - name: Criar filtro de firewall
   junos_config: 
+    provider: "{{ connection_info }}"
     lines:
       - set firewall family inet filter FILTRO-v4
       - edit firewall family inet filter FILTRO-v4
@@ -54,6 +59,7 @@
 
 - name: Incluir filtro de firewall na interface
   junos_config:
+    provider: "{{ connection_info }}"
     lines:
       - edit interfaces "{{ Interfacev4 }}" unit "{{ Unitv4 }}"
       - set family inet filter input FILTRO-v4
@@ -66,17 +72,20 @@
 
 - name: Check configuração
   junos_config:
+    provider: "{{ connection_info }}"
     check_commit: yes
   when: interfaceFirewall.changed
   register: commitCheck
  
 - name: Confirma o commit
   junos_config:
+    provider: "{{ connection_info }}"
     confirm_commit: yes
   when: commitCheck.changed
 
 - name: Rollback das configurações
   junos_config:
+    provider: "{{ connection_info }}"      
     rollback: 0
   when: interfaceFirewall.changed == False
 
