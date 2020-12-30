@@ -1,4 +1,4 @@
-- hosts: cisco
+- hosts: nexus
   connection: local
   gather_facts: no
   roles:
