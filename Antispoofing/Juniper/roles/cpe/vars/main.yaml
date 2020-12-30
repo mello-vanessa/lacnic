@@ -4,7 +4,7 @@
 #ansible_network_os=junos
 #ansible_user=ansible
 #ansible_password=!vault |
-Interfacev4: "=ge-0/0/0"
+Interfacev4: "ge-0/0/0"
 Unitv4: "0"
 Interfacev6: "ge-0/0/0"
 Unitv6: "0"

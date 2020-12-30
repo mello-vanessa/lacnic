@@ -1,6 +1,12 @@
 ---
+- name: Checa se a prefix-list já existe
+  junos_command:
+    provider: "{{ connection_info }}"
+    commands: show configuration policy-options | match FILTRO-BOGOS-v4
+    #wait_for: result[0] contains FILTRO-BOGOS-v4
+
 - name: Prefix-List BOGONS
-  junipernetworks.junos.junos_config:
+  junos_config:
     provider: "{{ connection_info }}"
     lines:
       - set policy-options prefix-list FILTRO-BOGONS-v4 0.0.0.0/8
@@ -26,9 +32,9 @@
 
 # Filtro de proteção porta 25, bogons
 - name: Criar filtro de firewall
-  junipernetworks.junos.junos_config: 
+  junos_config: 
     provider: "{{ connection_info }}"
-    commands:
+    lines:
       - set firewall family inet filter FILTRO-v4 term 1 from address 0.0.0.0/0 
       - set firewall family inet filter FILTRO-v4 term 1 from protocol tcp
       - set firewall family inet filter FILTRO-v4 term 1 from port smtp
@@ -42,40 +48,38 @@
       - set firewall family inet6 filter FILTRO-v6 term 1 then discard
       - set firewall family inet6 filter FILTRO-v6 term 2 from source-prefix-list FILTRO-BOGONS-v6-DENY
       - set firewall family inet6 filter FILTRO-v6 term 2 then discard
-      - set firewall family inet6 filter FILTRO-v6 term 3 from source-prefix-list LISTA-BOGONS-v6-ACCEPT
+      - set firewall family inet6 filter FILTRO-v6 term 3 from source-prefix-list FILTRO-BOGONS-v6-ACCEPT
       - set firewall family inet6 filter FILTRO-v6 term 3 then accept
       - set firewall family inet6 filter FILTRO-v6 term Default then discard
   when: setBogons.changed
   register: criaFiltroFirewall
 
 - name: Incluir filtro de firewall na interface
-  junipernetworks.junos.junos_command:
+  junos_config:
     provider: "{{ connection_info }}"
-    commands:
-      - edit interfaces "{{ Interfacev4 }}" unit "{{ Unitv4 }}"
-      - set family inet filter input FILTRO-v4
-      - set family inet rpf-check
-      - top edit interfaces "{{ Interfacev6 }}" unit "{{ Unitv6 }}"
-      - set family inet6 filter input FILTRO-v6
-      - set family inet6 rpf-check  
+    lines:
+      - set interfaces "{{ Interfacev4 }}" unit "{{ Unitv4 }}" family inet filter input FILTRO-v4
+      - set interfaces "{{ Interfacev4 }}" unit "{{ Unitv4 }}" family inet rpf-check
+      - set interfaces "{{ Interfacev6 }}" unit "{{ Unitv6 }}" family inet6 filter input FILTRO-v6
+      - set interfaces "{{ Interfacev6 }}" unit "{{ Unitv6 }}" family inet6 rpf-check  
   when: criaFiltroFirewall.changed
   register: interfaceFirewall
 
 - name: Check configuração
-  junipernetworks.junos.junos_config:
+  junos_config:
     provider: "{{ connection_info }}"
     check_commit: yes
   when: interfaceFirewall.changed
   register: commitCheck
  
 - name: Confirma o commit
-  junipernetworks.junos.junos_config:
+  junos_config:
     provider: "{{ connection_info }}"
     confirm_commit: yes
   when: commitCheck.changed
 
-- name: Rollback das configurações
-  junipernetworks.junos.junos_config:
-    provider: "{{ connection_info }}"      
-    rollback: 0
-  when: interfaceFirewall.changed == FalseRemo
+  #- name: Rollback das configurações
+  #junos_config:
+  #  provider: "{{ connection_info }}"      
+  #  rollback: 0
+  #when: interfaceFirewall.failed == True
