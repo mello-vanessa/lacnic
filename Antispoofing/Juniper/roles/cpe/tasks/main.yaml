@@ -34,7 +34,7 @@
   register: setBogonV6
 
 # Filtro de proteção porta 25, bogons
-- name: Criar filtro de firewall
+- name: Criar filtro de firewall v4
   junos_config: 
     provider: "{{ connection_info }}"
     lines:
@@ -45,6 +45,13 @@
       - set firewall family inet filter FILTRO-v4 term 2 from source-prefix-list FILTRO-BOGONS-v4
       - set firewall family inet filter FILTRO-v4 term 2 then discard
       - set firewall family inet filter FILTRO-v4 term Default then accept
+  when: setBogonV4 is succeeded is succeeded
+  register: criaFiltroFirewallv4
+
+- name: Criar filtro de firewall v6
+  junos_config: 
+    provider: "{{ connection_info }}"
+    lines:
       - set firewall family inet6 filter FILTRO-v6 term 1 from address ::/0
       - set firewall family inet6 filter FILTRO-v6 term 1 from next-header tcp
       - set firewall family inet6 filter FILTRO-v6 term 1 from port smtp
@@ -54,8 +61,8 @@
       - set firewall family inet6 filter FILTRO-v6 term 3 from source-prefix-list FILTRO-BOGONS-v6-ACCEPT
       - set firewall family inet6 filter FILTRO-v6 term 3 then accept
       - set firewall family inet6 filter FILTRO-v6 term Default then discard
-  when: setBogonV4 is succeeded and setBogonV6 is succeeded
-  register: criaFiltroFirewall
+  when: setBogonV6 is succeeded
+  register: criaFiltroFirewallv6
 
 - name: Incluir filtro de firewall na interface
   junos_config:
@@ -65,7 +72,7 @@
       - set interfaces "{{ Interfacev4 }}" unit "{{ Unitv4 }}" family inet rpf-check
       - set interfaces "{{ Interfacev6 }}" unit "{{ Unitv6 }}" family inet6 filter input FILTRO-v6
       - set interfaces "{{ Interfacev6 }}" unit "{{ Unitv6 }}" family inet6 rpf-check  
-  when: criaFiltroFirewall.changed
+  when: criaFiltroFirewallv4 and criaFiltroFirewallv6 is changed
   register: interfaceFirewall
 
 - name: Check configuração
