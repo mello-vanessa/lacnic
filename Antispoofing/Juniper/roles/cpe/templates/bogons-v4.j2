@@ -1,27 +1,13 @@
-edit policy-options prefix-list FILTRO-BOGONS-v4
-set 0.0.0.0/8
-annotate 0.0.0.0/8 "Faixa de enderecos reservados para identificar que o host pertence a rede local"
-set 10.0.0.0/8
-annotate 10.0.0.0/8 "Faixa de enderecos privados"
-set 100.64.0.0/10
-annotate 100.64.0.0/10 "Faixa de enderecos privados do CGNAT"
-set 127.0.0.0/8
-annotate 127.0.0.0/8 "Faixa de enderecos reservados para loopback"
-set 169.254.0.0/16
-annotate 169.254.0.0/16 "Faixa de enderecos reservados para escopo local"
-set 172.16.0.0/12
-annotate 172.16.0.0/12 "Faixa de enderecos privados" 
-set 192.0.0.0/24
-annotate 192.0.0.0/24 "Faixa de enderecos reservado para atribuição a protocolos específicos"
-set 192.168.0.0/16
-annotate 192.0.2.0/24 "Faixa de enderecos reservado para documentação" 
-set 192.168.0.0/16
-annotate 192.168.0.0/16 "Faixa de enderecos privados"
-set 198.18.0.0/15
-annotate 198.18.0.0/15 "Faixa de enderecos reservado para testes - benchmarking"
-set 198.51.100.0/24
-annotate 198.51.100.0/24 "Faixa de enderecos reservado para documentação"
-set 203.0.113.0/24
-annotate 203.0.113.0/24 "Faixa de enderecos reservado para documentação"
-set 224.0.0.0/3
-annotate 224.0.0.0/3 "Faixa de enderecos reservado da antiga classe D de multicast e uso futuro"
+set policy-options prefix-list FILTRO-BOGONS-v4 0.0.0.0/8
+set policy-options prefix-list FILTRO-BOGONS-v4 10.0.0.0/8
+set policy-options prefix-list FILTRO-BOGONS-v4 100.64.0.0/10
+set policy-options prefix-list FILTRO-BOGONS-v4 127.0.0.0/8
+set policy-options prefix-list FILTRO-BOGONS-v4 169.254.0.0/16
+set policy-options prefix-list FILTRO-BOGONS-v4 172.16.0.0/12
+set policy-options prefix-list FILTRO-BOGONS-v4 192.0.0.0/24
+set policy-options prefix-list FILTRO-BOGONS-v4 192.168.0.0/16
+set policy-options prefix-list FILTRO-BOGONS-v4 192.168.0.0/16
+set policy-options prefix-list FILTRO-BOGONS-v4 198.18.0.0/15
+set policy-options prefix-list FILTRO-BOGONS-v4 198.51.100.0/24
+set policy-options prefix-list FILTRO-BOGONS-v4 203.0.113.0/24
+set policy-options prefix-list FILTRO-BOGONS-v4 224.0.0.0/3

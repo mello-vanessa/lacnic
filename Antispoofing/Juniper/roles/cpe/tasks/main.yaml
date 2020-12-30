@@ -18,13 +18,18 @@
     dest: /tmp/
   register: uploadBogonv6
 
+- name: TESTE
+  junipernetworks.junos.junos_config:
+    provider: "{{ connection_info }}"
+    lines:
+      - set policy-options prefix-list FILTRO-BOGONS-v4 0.0.0.0/8
+
 - name: Prefix-List BOGONS
   junos_config:
     provider: "{{ connection_info }}"
     lines:
-      - show | compare rollback 0
       - load set /tmp/bogons-v4.j2
-      - load set /tmp/bogons-v6.j2
+        #      - load set /tmp/bogons-v6.j2
     comment: "Prefix-list BOGON para IPv4 and IPv6"
   when: uploadBogonv4.changed and uploadBogonv6.changed
   register: loadSetBogons
