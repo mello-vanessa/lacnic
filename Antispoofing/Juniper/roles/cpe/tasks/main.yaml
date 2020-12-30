@@ -45,7 +45,7 @@
       - set firewall family inet filter FILTRO-v4 term 2 from source-prefix-list FILTRO-BOGONS-v4
       - set firewall family inet filter FILTRO-v4 term 2 then discard
       - set firewall family inet filter FILTRO-v4 term Default then accept
-  when: setBogonV4 is succeeded is succeeded
+  when: setBogonV4 is succeeded
   register: criaFiltroFirewallv4
 
 - name: Criar filtro de firewall v6

@@ -11,6 +11,6 @@ Unitv6: "0"
 connection_info:
   host: "172.16.0.11"
   username: "ansible"
-  password: ""
+  password: "{{ pass }}"
   port: "830"
 
