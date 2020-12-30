@@ -18,18 +18,12 @@
     dest: /tmp/
   register: uploadBogonv6
 
-- name: TESTE
-  junipernetworks.junos.junos_config:
-    provider: "{{ connection_info }}"
-    lines:
-      - set policy-options prefix-list FILTRO-BOGONS-v4 0.0.0.0/8
-
 - name: Prefix-List BOGONS
-  junos_config:
+  junipernetworks.junos.junos_command:
     provider: "{{ connection_info }}"
-    lines:
+    commands:
       - load set /tmp/bogons-v4.j2
-        #      - load set /tmp/bogons-v6.j2
+      - load set /tmp/bogons-v6.j2
     comment: "Prefix-list BOGON para IPv4 and IPv6"
   when: uploadBogonv4.changed and uploadBogonv6.changed
   register: loadSetBogons
@@ -38,7 +32,7 @@
 - name: Criar filtro de firewall
   junos_config: 
     provider: "{{ connection_info }}"
-    lines:
+    commands:
       - set firewall family inet filter FILTRO-v4
       - edit firewall family inet filter FILTRO-v4
       - set term 1 from address 0.0.0.0/0 
@@ -63,9 +57,9 @@
   register: criaFiltroFirewall
 
 - name: Incluir filtro de firewall na interface
-  junos_config:
+  junipernetworks.junos.junos_command:
     provider: "{{ connection_info }}"
-    lines:
+    commands:
       - edit interfaces "{{ Interfacev4 }}" unit "{{ Unitv4 }}"
       - set family inet filter input FILTRO-v4
       - set family inet rpf-check
