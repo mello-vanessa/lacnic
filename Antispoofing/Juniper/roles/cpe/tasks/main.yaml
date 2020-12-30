@@ -1,59 +1,51 @@
 ---
-#- name: Habilitar NETCONF
-#    connection: network_cli
-#    junos_netconf:
-#    when: ansible_network_os == 'junos'
-
-- name: Enviar template v4
-  junos_scp:
-    provider: "{{ connection_info }}"
-    src: roles/cpe/templates/bogons-v4.j2
-    dest: /tmp/
-  register: uploadBogonv4
-
-- name: Enviar template v6
-  junos_scp: 
-    provider: "{{ connection_info }}"
-    src: roles/cpe/templates/bogons-v6.j2
-    dest: /tmp/
-  register: uploadBogonv6
-
 - name: Prefix-List BOGONS
-  junipernetworks.junos.junos_command:
+  junipernetworks.junos.junos_config:
     provider: "{{ connection_info }}"
-    commands:
-      - load set /tmp/bogons-v4.j2
-      - load set /tmp/bogons-v6.j2
+    lines:
+      - set policy-options prefix-list FILTRO-BOGONS-v4 0.0.0.0/8
+      - set policy-options prefix-list FILTRO-BOGONS-v4 10.0.0.0/8
+      - set policy-options prefix-list FILTRO-BOGONS-v4 100.64.0.0/10
+      - set policy-options prefix-list FILTRO-BOGONS-v4 127.0.0.0/8
+      - set policy-options prefix-list FILTRO-BOGONS-v4 169.254.0.0/16
+      - set policy-options prefix-list FILTRO-BOGONS-v4 172.16.0.0/12
+      - set policy-options prefix-list FILTRO-BOGONS-v4 192.0.0.0/24
+      - set policy-options prefix-list FILTRO-BOGONS-v4 192.168.0.0/16
+      - set policy-options prefix-list FILTRO-BOGONS-v4 192.168.0.0/16
+      - set policy-options prefix-list FILTRO-BOGONS-v4 198.18.0.0/15
+      - set policy-options prefix-list FILTRO-BOGONS-v4 198.51.100.0/24
+      - set policy-options prefix-list FILTRO-BOGONS-v4 203.0.113.0/24
+      - set policy-options prefix-list FILTRO-BOGONS-v4 224.0.0.0/3
+      - set policy-options prefix-list FILTRO-BOGONS-v6-DENY 2001:db8::/32
+      - set policy-options prefix-list FILTRO-BOGONS-v6-ACCEPT 2000::/3
+      - set policy-options prefix-list FILTRO-BOGONS-v6-ACCEPT 2000::/3
+      - set policy-options prefix-list FILTRO-BOGONS-v6-ACCEPT ::/128
+      - set policy-options prefix-list FILTRO-BOGONS-v6-ACCEPT ::/128
     comment: "Prefix-list BOGON para IPv4 and IPv6"
-  when: uploadBogonv4.changed and uploadBogonv6.changed
-  register: loadSetBogons
+  register: setBogons
 
 # Filtro de proteção porta 25, bogons
 - name: Criar filtro de firewall
-  junos_config: 
+  junipernetworks.junos.junos_config: 
     provider: "{{ connection_info }}"
     commands:
-      - set firewall family inet filter FILTRO-v4
-      - edit firewall family inet filter FILTRO-v4
-      - set term 1 from address 0.0.0.0/0 
-      - set term 1 from protocol tcp
-      - set term 1 from port smtp
-      - set term 1 then discard
-      - set term 2 from source-prefix-list FILTRO-BOGONS-v4
-      - set term 2 then discard
-      - set term Default then accept
-      - top set firewall family inet6 filter FILTRO-v6
-      - edit firewall family inet6 filter FILTRO-v6
-      - set term 1 from address ::/0
-      - set term 1 from next-header tcp
-      - set term 1 from port smtp
-      - set term 1 then discard
-      - set term 2 from source-prefix-list FILTRO-BOGONS-v6-DENY
-      - set term 2 then discard
-      - set term 3 from source-prefix-list LISTA-BOGONS-v6-ACCEPT
-      - set term 3 then accept
-      - set term Default then discard
-  when: loadSetBogons.changed
+      - set firewall family inet filter FILTRO-v4 term 1 from address 0.0.0.0/0 
+      - set firewall family inet filter FILTRO-v4 term 1 from protocol tcp
+      - set firewall family inet filter FILTRO-v4 term 1 from port smtp
+      - set firewall family inet filter FILTRO-v4 term 1 then discard
+      - set firewall family inet filter FILTRO-v4 term 2 from source-prefix-list FILTRO-BOGONS-v4
+      - set firewall family inet filter FILTRO-v4 term 2 then discard
+      - set firewall family inet filter FILTRO-v4 term Default then accept
+      - set firewall family inet6 filter FILTRO-v6 term 1 from address ::/0
+      - set firewall family inet6 filter FILTRO-v6 term 1 from next-header tcp
+      - set firewall family inet6 filter FILTRO-v6 term 1 from port smtp
+      - set firewall family inet6 filter FILTRO-v6 term 1 then discard
+      - set firewall family inet6 filter FILTRO-v6 term 2 from source-prefix-list FILTRO-BOGONS-v6-DENY
+      - set firewall family inet6 filter FILTRO-v6 term 2 then discard
+      - set firewall family inet6 filter FILTRO-v6 term 3 from source-prefix-list LISTA-BOGONS-v6-ACCEPT
+      - set firewall family inet6 filter FILTRO-v6 term 3 then accept
+      - set firewall family inet6 filter FILTRO-v6 term Default then discard
+  when: setBogons.changed
   register: criaFiltroFirewall
 
 - name: Incluir filtro de firewall na interface
@@ -70,21 +62,20 @@
   register: interfaceFirewall
 
 - name: Check configuração
-  junos_config:
+  junipernetworks.junos.junos_config:
     provider: "{{ connection_info }}"
     check_commit: yes
   when: interfaceFirewall.changed
   register: commitCheck
  
 - name: Confirma o commit
-  junos_config:
+  junipernetworks.junos.junos_config:
     provider: "{{ connection_info }}"
     confirm_commit: yes
   when: commitCheck.changed
 
 - name: Rollback das configurações
-  junos_config:
+  junipernetworks.junos.junos_config:
     provider: "{{ connection_info }}"      
     rollback: 0
-  when: interfaceFirewall.changed == False
-
+  when: interfaceFirewall.changed == FalseRemo
