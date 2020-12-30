@@ -1,21 +1,34 @@
 ---
-- name: Checa se a prefix-list já existe
+- name: Checa se a prefix-list v4 já existe
   junos_command:
     provider: "{{ connection_info }}"
     commands: show configuration policy-options
     wait_for: result[0] contains FILTRO-BOGONS-v4
   ignore_errors: yes
-  register: checkFiltroBogons
+  register: checkFiltroBogonsv4
 
-- debug:
-    var: factsJunos.ansible_facts.ansible_net_config
+- name: Checa se a prefix-list v6 accept já existe
+  junos_command:
+    provider: "{{ connection_info }}"
+    commands: show configuration policy-options
+    wait_for: result[0] contains FILTRO-BOGONS-v6-ACCEPT
+  ignore_errors: yes
+  register: checkFiltroBogonsv6Accept
+
+- name: Checa se a prefix-list v6 deny já existe
+  junos_command:  
+    provider: "{{ connection_info }}" 
+    commands: show configuration policy-options  
+    wait_for: result[0] contains FILTRO-BOGONS-v6-DENY
+  ignore_errors: yes
+  register: checkFiltroBogonsv6Deny
 
 - name: Enviar template v4
   junos_scp:
     provider: "{{ connection_info }}"
     src: roles/cpe/templates/bogons-v4.j2
     dest: /tmp/
-  when: checkFiltroBogons is failed
+  when: checkFiltroBogonsv4 is failed
   register: uploadBogonv4
 
 - name: Enviar template v6
@@ -23,6 +36,7 @@
     provider: "{{ connection_info }}"
     src: roles/cpe/templates/bogons-v6.j2
     dest: /tmp/
+  when: checkFiltroBogonsv4 and checkFiltroBogonsv6Deny is failed
   register: uploadBogonv6
 
 - name: Criar prefix-list BOGONS v4
@@ -51,7 +65,7 @@
       - set firewall family inet filter FILTRO-v4 term 2 from source-prefix-list FILTRO-BOGONS-v4
       - set firewall family inet filter FILTRO-v4 term 2 then discard
       - set firewall family inet filter FILTRO-v4 term Default then accept
-  when: setBogonV4 is succeeded
+  when: setBogonV4 is succeeded and setBogonV4 is changed
   register: criaFiltroFirewallv4
 
 - name: Criar filtro de firewall v6
@@ -67,7 +81,7 @@
       - set firewall family inet6 filter FILTRO-v6 term 3 from source-prefix-list FILTRO-BOGONS-v6-ACCEPT
       - set firewall family inet6 filter FILTRO-v6 term 3 then accept
       - set firewall family inet6 filter FILTRO-v6 term Default then discard
-  when: setBogonV6 is succeeded
+  when: setBogonV6 is succeeded and setBogonV6 is changed
   register: criaFiltroFirewallv6
 
 - name: Incluir filtro de firewall na interface
