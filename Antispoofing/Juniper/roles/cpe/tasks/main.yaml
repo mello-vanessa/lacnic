@@ -5,30 +5,33 @@
     commands: show configuration policy-options | match FILTRO-BOGOS-v4
     #wait_for: result[0] contains FILTRO-BOGOS-v4
 
-- name: Prefix-List BOGONS
-  junos_config:
+- name: Enviar template v4
+  junos_scp:
     provider: "{{ connection_info }}"
-    lines:
-      - set policy-options prefix-list FILTRO-BOGONS-v4 0.0.0.0/8
-      - set policy-options prefix-list FILTRO-BOGONS-v4 10.0.0.0/8
-      - set policy-options prefix-list FILTRO-BOGONS-v4 100.64.0.0/10
-      - set policy-options prefix-list FILTRO-BOGONS-v4 127.0.0.0/8
-      - set policy-options prefix-list FILTRO-BOGONS-v4 169.254.0.0/16
-      - set policy-options prefix-list FILTRO-BOGONS-v4 172.16.0.0/12
-      - set policy-options prefix-list FILTRO-BOGONS-v4 192.0.0.0/24
-      - set policy-options prefix-list FILTRO-BOGONS-v4 192.168.0.0/16
-      - set policy-options prefix-list FILTRO-BOGONS-v4 192.168.0.0/16
-      - set policy-options prefix-list FILTRO-BOGONS-v4 198.18.0.0/15
-      - set policy-options prefix-list FILTRO-BOGONS-v4 198.51.100.0/24
-      - set policy-options prefix-list FILTRO-BOGONS-v4 203.0.113.0/24
-      - set policy-options prefix-list FILTRO-BOGONS-v4 224.0.0.0/3
-      - set policy-options prefix-list FILTRO-BOGONS-v6-DENY 2001:db8::/32
-      - set policy-options prefix-list FILTRO-BOGONS-v6-ACCEPT 2000::/3
-      - set policy-options prefix-list FILTRO-BOGONS-v6-ACCEPT 2000::/3
-      - set policy-options prefix-list FILTRO-BOGONS-v6-ACCEPT ::/128
-      - set policy-options prefix-list FILTRO-BOGONS-v6-ACCEPT ::/128
-    comment: "Prefix-list BOGON para IPv4 and IPv6"
-  register: setBogons
+    src: roles/cpe/templates/bogons-v4.j2
+    dest: /tmp/
+  register: uploadBogonv4
+
+- name: Enviar template v6
+  junos_scp: 
+    provider: "{{ connection_info }}"
+    src: roles/cpe/templates/bogons-v6.j2
+    dest: /tmp/
+  register: uploadBogonv6
+
+- name: Criar prefix-list BOGONS v4
+  junos_config:
+    src: bogons-v4.j2
+    src_format: set
+  when: uploadBogonv4.changed
+  register: setBogonV4
+
+- name: Criar prefix-list BOGONS v6
+  junos_config:
+    src: bogons-v6.j2
+    src_format: set
+  when: uploadBogonv6.changed
+  register: setBogonV6
 
 # Filtro de proteção porta 25, bogons
 - name: Criar filtro de firewall
@@ -51,7 +54,7 @@
       - set firewall family inet6 filter FILTRO-v6 term 3 from source-prefix-list FILTRO-BOGONS-v6-ACCEPT
       - set firewall family inet6 filter FILTRO-v6 term 3 then accept
       - set firewall family inet6 filter FILTRO-v6 term Default then discard
-  when: setBogons.changed
+  when: setBogonV4 is succeeded and setBogonV6 is succeeded
   register: criaFiltroFirewall
 
 - name: Incluir filtro de firewall na interface
