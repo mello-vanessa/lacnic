@@ -2,14 +2,20 @@
 - name: Checa se a prefix-list já existe
   junos_command:
     provider: "{{ connection_info }}"
-    commands: show configuration policy-options | match FILTRO-BOGOS-v4
-    #wait_for: result[0] contains FILTRO-BOGOS-v4
+    commands: show configuration policy-options
+    wait_for: result[0] contains FILTRO-BOGONS-v4
+  ignore_errors: yes
+  register: checkFiltroBogons
+
+- debug:
+    var: factsJunos.ansible_facts.ansible_net_config
 
 - name: Enviar template v4
   junos_scp:
     provider: "{{ connection_info }}"
     src: roles/cpe/templates/bogons-v4.j2
     dest: /tmp/
+  when: checkFiltroBogons is failed
   register: uploadBogonv4
 
 - name: Enviar template v6
