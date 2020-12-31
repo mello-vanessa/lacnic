@@ -43,7 +43,6 @@
 # Filtro de proteção porta 25, bogons
 - name: Criar filtro de firewall v4
   junos_config: 
-  # provider: "{{ connection_info }}"
     lines:
       - set firewall family inet filter FILTRO-v4 term 1 from address 0.0.0.0/0 
       - set firewall family inet filter FILTRO-v4 term 1 from protocol tcp
@@ -57,7 +56,6 @@
 
 - name: Criar filtro de firewall v6
   junos_config: 
-  # provider: "{{ connection_info }}"
     lines:
       - set firewall family inet6 filter FILTRO-v6 term 1 from address ::/0
       - set firewall family inet6 filter FILTRO-v6 term 1 from next-header tcp
@@ -73,7 +71,6 @@
 
 - name: Incluir filtro de firewall na interface
   junos_config:
-  # provider: "{{ connection_info }}"
     lines:
       - set interfaces "{{ Interfacev4 }}" unit "{{ Unitv4 }}" family inet filter input FILTRO-v4
       - set interfaces "{{ Interfacev4 }}" unit "{{ Unitv4 }}" family inet rpf-check
@@ -82,21 +79,7 @@
   when: criaFiltroFirewallv4 and criaFiltroFirewallv6 is changed
   register: interfaceFirewall
 
-- name: Check configuração
+- name: Rollback das configurações
   junos_config:
-  # provider: "{{ connection_info }}"
-    check_commit: yes
-  when: interfaceFirewall.changed
-  register: commitCheck
- 
-- name: Confirma o commit
-  junos_config:
- #  provider: "{{ connection_info }}"
-    confirm_commit: yes
-  when: commitCheck.changed
-
-  #- name: Rollback das configurações
-  #junos_config:
-  #  provider: "{{ connection_info }}"      
-  #  rollback: 0
-  #when: interfaceFirewall.failed == True
+    rollback: 0
+  when: interfaceFirewall.failed == True
