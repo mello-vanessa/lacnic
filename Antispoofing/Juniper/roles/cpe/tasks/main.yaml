@@ -24,7 +24,7 @@
   register: checkFiltroBogonsv6Deny
 
 - name: Incluir task scp 
-  include_tasks: ../../../scp.yaml
+  include_tasks: scp.yaml
  
 - name: Criar prefix-list BOGONS v4
   junos_config:
@@ -38,7 +38,7 @@
     src: bogons-v6.j2
     src_format: set
   when: uploadBogonv6.changed
-  register: setBogonV
+  register: setBogonV6
 
 # Filtro de proteção porta 25, bogons
 - name: Criar filtro de firewall v4
