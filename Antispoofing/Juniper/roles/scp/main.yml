@@ -1,1 +1,16 @@
 ---
+- name: Enviar template v4
+  junos_scp:
+    src: roles/cpe/templates/bogons-v4.j2
+    dest: /tmp/
+  connection: network_cli
+  when: checkFiltroBogonsv4 is failed
+  register: uploadBogonv4
+
+- name: Enviar template v6
+  junos_scp:
+    src: roles/cpe/templates/bogons-v6.j2
+    dest: /tmp/
+  connection: local
+  when: checkFiltroBogonsv6Accept and checkFiltroBogonsv6Deny is failed
+  register: uploadBogonv6
