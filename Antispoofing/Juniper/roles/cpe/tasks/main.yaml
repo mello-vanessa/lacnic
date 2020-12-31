@@ -1,62 +1,46 @@
 ---
 - name: Checa se a prefix-list v4 já existe
   junos_command:
-    provider: "{{ connection_info }}"
     commands: show configuration policy-options
     wait_for: result[0] contains FILTRO-BOGONS-v4
+    retries: 2
   ignore_errors: yes
   register: checkFiltroBogonsv4
 
 - name: Checa se a prefix-list v6 accept já existe
   junos_command:
-    provider: "{{ connection_info }}"
     commands: show configuration policy-options
     wait_for: result[0] contains FILTRO-BOGONS-v6-ACCEPT
+    retries: 2
   ignore_errors: yes
   register: checkFiltroBogonsv6Accept
 
 - name: Checa se a prefix-list v6 deny já existe
   junos_command:  
-    provider: "{{ connection_info }}" 
     commands: show configuration policy-options  
     wait_for: result[0] contains FILTRO-BOGONS-v6-DENY
+    retries: 2
   ignore_errors: yes
   register: checkFiltroBogonsv6Deny
 
-- name: Enviar template v4
-  junos_scp:
-    provider: "{{ connection_info }}"
-    src: roles/cpe/templates/bogons-v4.j2
-    dest: /tmp/
-  when: checkFiltroBogonsv4 is failed
-  register: uploadBogonv4
-
-- name: Enviar template v6
-  junos_scp: 
-    provider: "{{ connection_info }}"
-    src: roles/cpe/templates/bogons-v6.j2
-    dest: /tmp/
-  when: checkFiltroBogonsv4 and checkFiltroBogonsv6Deny is failed
-  register: uploadBogonv6
-
 - name: Criar prefix-list BOGONS v4
-  junos_config:
-    src: bogons-v4.j2
-    src_format: set
-  when: uploadBogonv4.changed
+  junos_command:
+    commands: 
+      - 
+  when: checkFiltroBogonsv4 is failed
   register: setBogonV4
 
 - name: Criar prefix-list BOGONS v6
-  junos_config:
-    src: bogons-v6.j2
-    src_format: set
+  junos_command:
+    commands:
+      -
   when: uploadBogonv6.changed
   register: setBogonV6
 
 # Filtro de proteção porta 25, bogons
 - name: Criar filtro de firewall v4
   junos_config: 
-    provider: "{{ connection_info }}"
+  # provider: "{{ connection_info }}"
     lines:
       - set firewall family inet filter FILTRO-v4 term 1 from address 0.0.0.0/0 
       - set firewall family inet filter FILTRO-v4 term 1 from protocol tcp
@@ -70,7 +54,7 @@
 
 - name: Criar filtro de firewall v6
   junos_config: 
-    provider: "{{ connection_info }}"
+  # provider: "{{ connection_info }}"
     lines:
       - set firewall family inet6 filter FILTRO-v6 term 1 from address ::/0
       - set firewall family inet6 filter FILTRO-v6 term 1 from next-header tcp
@@ -86,7 +70,7 @@
 
 - name: Incluir filtro de firewall na interface
   junos_config:
-    provider: "{{ connection_info }}"
+  # provider: "{{ connection_info }}"
     lines:
       - set interfaces "{{ Interfacev4 }}" unit "{{ Unitv4 }}" family inet filter input FILTRO-v4
       - set interfaces "{{ Interfacev4 }}" unit "{{ Unitv4 }}" family inet rpf-check
@@ -97,14 +81,14 @@
 
 - name: Check configuração
   junos_config:
-    provider: "{{ connection_info }}"
+  # provider: "{{ connection_info }}"
     check_commit: yes
   when: interfaceFirewall.changed
   register: commitCheck
  
 - name: Confirma o commit
   junos_config:
-    provider: "{{ connection_info }}"
+ #  provider: "{{ connection_info }}"
     confirm_commit: yes
   when: commitCheck.changed
 

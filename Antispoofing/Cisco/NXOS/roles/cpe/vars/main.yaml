@@ -1,2 +1,12 @@
 ---
+connection_info:
+  host: "{{ ansible_host }}"
+  username: "{{ ansible_user }}"
+  auth_pass: "{{ pass }}"
+  transport: "cli"
+  timeout: "120"
+  port: "22"
+#ansible_become: yes
+#ansible_become_method: enable
+#ansible_become_password: "{{ pass }}"
 

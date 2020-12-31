@@ -1,4 +1,4 @@
-- hosts: nexus
+- hosts: nxos
   connection: local
   gather_facts: no
   roles:

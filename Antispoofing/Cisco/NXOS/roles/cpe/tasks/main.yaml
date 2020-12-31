@@ -1,0 +1,11 @@
+---
+- name: run multiple commands on remote nodes
+  nxos_command:
+    provider: "{{ connection_info }}"
+    commands:
+    - show version
+    
+#- name: Criação de ponto de checkpoint para rollback 
+#  nxos_rollback:
+#    provider: "{{ connection_info }}"
+#    checkpoint_file: backup.cfg

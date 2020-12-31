@@ -1,5 +1,5 @@
 - hosts: juniper
-  connection: local
+  #connection: ansible.netcommon.netconf
   gather_facts: no
   roles:
     - cpe
