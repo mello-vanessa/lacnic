@@ -82,4 +82,4 @@
 - name: Rollback das configurações
   junos_config:
     rollback: 0
-  when: interfaceFirewall.failed
+  when: interfaceFirewall is failed
