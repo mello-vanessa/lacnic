@@ -1,5 +1,5 @@
 - hosts: nxos
-  connection: local
+  connection: ansible.netcommon.network_cli
   gather_facts: no
   roles:
     - cpe

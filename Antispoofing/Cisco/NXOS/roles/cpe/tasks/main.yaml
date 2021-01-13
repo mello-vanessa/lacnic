@@ -1,7 +1,7 @@
 ---
-- name: run multiple commands on remote nodes
+- name: Show version
   nxos_command:
-    provider: "{{ connection_info }}"
+#   provider: "{{ connection_info }}"
     commands:
     - show version
     
