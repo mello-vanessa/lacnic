@@ -99,8 +99,8 @@
   when: checkFiltroBogonsv6 is failed
   register: filtroBogonsv6
 
-# Falta configuração SNTP porta 25 e ver se já existe essas configs
-- name: Configurar filtros na interface, bloqueio SMTP, CDP, RA IPv6
+# Falta configuração SMTP porta 25 e ver se já existe essas configs
+- name: Configurar filtros na interface, bloqueio SMTP, CDP
   cisco.ios.ios_config:
     lines:
     - ip access-group FILTRO-BOGONS-V4 in
@@ -109,7 +109,7 @@
     parents: "{{ Interfacev4 }}"
   when: filtroBogonsv4 is changed
 
-# Falta configuração SNTP porta 25 e ver se já existe essas configs
+# Falta configuração SMTP porta 25 e ver se já existe essas configs
 - name: Configurar filtros na interface, bloqueio SMTP, CDP, RA IPv6
   cisco.ios.ios_config:
     lines:

@@ -69,6 +69,7 @@
   when: setBogonV6 is succeeded and setBogonV6 is changed
   register: criaFiltroFirewallv6
 
+# Criar task de idempotencia se já existe na interface essas configs - testar flag de interface defined
 - name: Incluir filtro de firewall na interface
   junos_config:
     lines:
