@@ -1,4 +1,4 @@
 ---
 # Edite aqui as interfaces conectadas com o ISP
-Interfacev4: "Ethernet0/1"
-Interfacev6: "Ethernet0/1"
+Interfacev4: "ethernet 0/1"
+Interfacev6: "ethernet 0/1"
