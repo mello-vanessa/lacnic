@@ -1,0 +1,6 @@
+---
+- name: Show version
+  cisco.ios.ios_command:
+#   provider: "{{ connection_info }}"
+    commands:
+    - show version

@@ -1,2 +1,2 @@
-# Antispoofing
-Scripts para automação do Antispoofing em CPE´s e PE´s em Cisco
+# NXOS
+Scripts para automação no sistema operacional NXOS - Cisco

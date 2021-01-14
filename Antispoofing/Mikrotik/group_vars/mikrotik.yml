@@ -1,0 +1,4 @@
+ansible_network_os: junipernetworks.junos.junos
+ansible_connection: ansible.netcommon.netconf
+ansible_user: ansible
+ansible_ssh_private_key_file: ~/.ssh/Ansible_SSH_key
