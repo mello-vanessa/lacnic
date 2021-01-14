@@ -76,7 +76,7 @@
       - set interfaces "{{ Interfacev4 }}" unit "{{ Unitv4 }}" family inet rpf-check
       - set interfaces "{{ Interfacev6 }}" unit "{{ Unitv6 }}" family inet6 filter input FILTRO-v6
       - set interfaces "{{ Interfacev6 }}" unit "{{ Unitv6 }}" family inet6 rpf-check  
-  when: criaFiltroFirewallv4 and criaFiltroFirewallv6 is changed
+  when: criaFiltroFirewallv4 and criaFiltroFirewallv6 is changed and Interfacev4 is defined and Interfacev6 is defined
   register: interfaceFirewall
 
 - name: Rollback das configurações

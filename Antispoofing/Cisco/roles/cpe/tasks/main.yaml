@@ -2,8 +2,47 @@
 - name: Checa se CEF está ativo
   cisco.ios.ios_command:
     commands:
-    - show running-config | include cef
-    wait_for: stdout contains no
+    - show ip cef
+    wait_for: result[0] contains not
     retries: 2
-    ignore_errors: yes
-  register: checkCef
+  ignore_errors: yes
+  register: checkCefv4
+
+- name: Verifica se roteamento IPv6 está ativo
+  cisco.ios.ios_command:
+    commands:
+    - show running-config | include unicast
+    wait_for: result[0] contains unicast
+    retries: 2
+  ignore_errors: yes
+  register: checkRoteamentov6
+
+- name: Ativa roteamento IPv6
+  cisco.ios.ios_config:
+    lines:
+    - ipv6 unicast-routing
+  when: checkRoteamentov6 is failed
+  register: ativaRoteamentoIpv6
+
+- name: Checa se CEF v6 está ativo
+  cisco.ios.ios_command:
+    commands: 
+    - show ipv6 cef
+    wait_for: result[0] contains not
+    retries: 2
+  ignore_errors: yes
+  register: checkCefv6
+
+- name: Ativar o CEF IPv4
+  cisco.ios.ios_config:
+    lines:
+    - ip cef
+  when: checkCefv4 is not failed
+  register: configCefIpv4
+
+- name: Ativar o CEF IPv6
+  cisco.ios.ios_config:
+    lines:
+    - ipv6 cef
+  when: checkCefv6 is not failed
+  register: configCefIpv6
