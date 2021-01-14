@@ -46,3 +46,76 @@
     - ipv6 cef
   when: checkCefv6 is not failed
   register: configCefIpv6
+
+- name: Verificar se a access-list de Filtro v4 existe
+  cisco.ios.ios_command:
+    commands:
+    - show ip access-lists | include FILTRO-BOGONS-V4
+    wait_for: result[0] contains FILTRO-BOGONS-V4
+    retries: 2
+  ignore_errors: yes
+  register: checkFiltroBogonsv4
+
+
+- name: Verificar se a access-list de Filtro v6 existe
+  cisco.ios.ios_command:
+    commands:
+    - show ipv6 access-list | include FILTRO-BOGONS-V6
+    wait_for: result[0] contains FILTRO-BOGONS-V6
+    retries: 2
+  ignore_errors: yes
+  register: checkFiltroBogonsv6
+
+- name: Criar access list BOGONS v4
+  cisco.ios.ios_config:
+    lines:
+    - ip access-list extended FILTRO-BOGONS-V4
+    - deny ip 0.0.0.0 0.255.255.255 any
+    - deny ip 10.0.0.0 0.255.255.255 any
+    - deny ip 100.64.0.0 0.63.255.255 any
+    - deny ip 127.0.0.0 0.255.255.255 any
+    - deny ip 169.254.0.0 0.0.255.255 any
+    - deny ip 172.16.0.0 0.15.255.255 any
+    - deny ip 192.0.0.0 0.0.0.255 any
+    - deny ip 192.0.2.0 0.0.0.255 any
+    - deny ip 192.168.0.0 0.0.255.255 any
+    - deny ip 198.18.0.0 0.1.255.255 any
+    - deny ip 198.51.100.0 0.0.0.255 any
+    - deny ip 203.0.113.0 0.0.0.255 any
+    - deny ip 224.0.0.0 31.255.255.255 any
+    - permit ip any any
+  when: checkFiltroBogonsv4 is failed
+  register: filtroBogonsv4
+
+- name: Criar access list BOGONS v6
+  cisco.ios.ios_config:
+    lines:
+    - ipv6 access-list extended FILTRO-BOGONS-V6
+    - deny ipv6 2001:db8::/32 any
+    - permit ipv6 2000::/3 any
+    - permit ipv6 fe80::/64 any
+    - permit ipv6 ::/128 any
+    - deny ipv6 ::/0 any
+  when: checkFiltroBogonsv6 is failed
+  register: filtroBogonsv6
+
+# Falta configuração SNTP porta 25 e ver se já existe essas configs
+- name: Configurar filtros na interface, bloqueio SMTP, CDP, RA IPv6
+  cisco.ios.ios_config:
+    lines:
+    - ip access-group FILTRO-BOGONS-V4 in
+    - ip verify unicast source reachable-via rx
+    - no cdp enable
+    parents: "{{ Interfacev4 }}"
+  when: filtroBogonsv4 is changed
+
+# Falta configuração SNTP porta 25 e ver se já existe essas configs
+- name: Configurar filtros na interface, bloqueio SMTP, CDP, RA IPv6
+  cisco.ios.ios_config:
+    lines:
+    - ipv6 traffic-filter FILTRO-BOGONS-V6
+    - ipv6 verify unicast source reachable-via rx
+    - no cdp enable
+    - ipv6 nd ra suppress all
+    parents: "{{ Interfacev6 }}"
+  when: filtroBogonsv6 is changed
