@@ -1,6 +1,10 @@
 ---
 - name: Show version
   cisco.ios.ios_command:
-#   provider: "{{ connection_info }}"
     commands:
     - show version
+
+- name: Checa se CEF está ativo
+  cisco.ios.ios_command:
+    commands:
+    - show running-config | include cef
