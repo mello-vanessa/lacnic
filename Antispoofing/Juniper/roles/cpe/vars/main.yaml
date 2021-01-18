@@ -4,9 +4,11 @@ Interfacev4: "ge-0/0/0"
 Unitv4: "0"
 Interfacev6: "ge-0/0/0"
 Unitv6: "0"
+ansible_user: ansible
+ansible_network_os: junipernetworks.junos.junos
+ansible_ssh_private_key_file: ~/.ssh/Ansible_SSH_key
 connection_info:
   host: "{{ ansible_host }}"
   username: "{{ ansible_user }}"
   ssh_keyfile: "{{ ansible_ssh_private_key_file }}" 
-  #password: "{{ pass }}"
   port: "830"
