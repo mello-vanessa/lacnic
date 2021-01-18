@@ -1,0 +1,43 @@
+---
+- name: Verificar se a access-list de Filtro v4 existe
+  routeros_command:
+    commands:
+      - /ip firewall address-list print
+    wait_for: result[0] contains FILTRO-BOGONS-V4
+  ignore_errors: yes
+  register: checkFiltroBogonsv4
+
+- name: Verificar se a access-list de Filtro v6 existe
+  routeros_command:
+    commands:
+    - /ipv6 firewall address-list print 
+    wait_for: result[0] contains FILTRO-BOGONS-V6
+  ignore_errors: yes
+  register: checkFiltroBogonsv6
+
+- name: Criar access list BOGONS v4
+  routeros_command:
+    commands:
+    - /ip firewall address-list add address=10.0.0.0/8 list=FILTRO-BOGONS-V4
+    - /ip firewall address-list add address=100.64.0.0/10 list=FILTRO-BOGONS-V4
+    - /ip firewall address-list add address=127.0.0.0/8 list=FILTRO-BOGONS-V4
+    - /ip firewall address-list add address=169.254.0.0/16 list=FILTRO-BOGONS-V4
+    - /ip firewall address-list add address=172.16.0.0/12 list=FILTRO-BOGONS-V4
+    - /ip firewall address-list add address=192.0.0.0/24 list=FILTRO-BOGONS-V4
+    - /ip firewall address-list add address=192.0.2.0/24 list=FILTRO-BOGONS-V4
+    - /ip firewall address-list add address=192.168.0.0/24 list=FILTRO-BOGONS-V4
+    - /ip firewall address-list add address=198.18.0.0/15 list=FILTRO-BOGONS-V4
+    - /ip firewall address-list add address=198.51.100.0/24 list=FILTRO-BOGONS-V4
+    - /ip firewall address-list add address=203.0.113.0/24 list=FILTRO-BOGONS-V4
+    - /ip firewall address-list add address=224.0.0.0/3 list=FILTRO-BOGONS-V4
+  when: checkFiltroBogonsv4 is failed
+  register: filtroBogonsv4
+
+- name: Criar access list BOGONS v6
+  routeros_command:
+    commands:
+    - /ipv6 firewall address-list add address=2000::/3 list=FILTRO-BOGONS-V6
+    - /ipv6 firewall address-list add address=fe80::/64 list=FILTRO-BOGONS-V6
+    - /ipv6 firewall address-list add address=::/128 list=FILTRO-BOGONS-V6
+  when: checkFiltroBogonsv6 is failed
+  register: filtroBogonsv6

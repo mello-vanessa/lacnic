@@ -1,2 +1,9 @@
 ---
-
+# Edite aqui as interfaces conectadas com o ISP
+Interfacev4: "ether2"
+Interfacev6: "ether2"
+# Fim da edição
+ansible_user: ansible
+ansible_ssh_private_key_file: ~/.ssh/Ansible_SSH_key
+ansible_network_os: routeros
+ansible_command_timeout: 180
