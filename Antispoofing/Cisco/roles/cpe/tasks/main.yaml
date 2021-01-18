@@ -83,6 +83,7 @@
     - deny ip 198.51.100.0 0.0.0.255 any
     - deny ip 203.0.113.0 0.0.0.255 any
     - deny ip 224.0.0.0 31.255.255.255 any
+    - deny tcp any any eq smtp
     - permit ip any any
   when: checkFiltroBogonsv4 is failed
   register: filtroBogonsv4
@@ -91,6 +92,7 @@
   cisco.ios.ios_config:
     lines:
     - ipv6 access-list FILTRO-BOGONS-V6
+    - deny tcp any any eq smtp
     - deny ipv6 2001:db8::/32 any
     - permit ipv6 2000::/3 any
     - permit ipv6 fe80::/64 any
@@ -99,7 +101,7 @@
   when: checkFiltroBogonsv6 is failed
   register: filtroBogonsv6
 
-# Falta configuração SMTP porta 25 e ver se já existe essas configs - idempotencia
+# Falta ver se já existe essas configs - idempotencia
 - name: IPv4 - Configurar filtros na interface bloqueio SMTP, CDP
   cisco.ios.ios_config:
     lines:
@@ -109,7 +111,7 @@
     parents: interface ethernet 0/1
   when: filtroBogonsv4 is changed
 
-# Falta configuração SMTP porta 25 e ver se já existe essas configs - idempotencia
+# Falta ver se já existe essas configs - idempotencia
 - name: IPv6 - Configurar filtros na interface, bloqueio SMTP, CDP, RA IPv6
   cisco.ios.ios_config:
     lines:

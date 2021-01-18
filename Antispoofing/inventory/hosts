@@ -1,11 +1,9 @@
 #Juniper
 [juniper]
-#vmx1 ansible_user=ansible ansible_host=172.16.0.11 ansible_network_os=junipernetworks.junos.junos ansible_ssh_private_key_file=~/.ssh/Ansible_SSH_key
 vmx1 ansible_host=172.16.0.11
 
 #Cisco 
 [ios]
-#ios01 ansible_user=ansible ansible_host=172.16.0.14 ansible_network_os=ios ansible_ssh_private_key_file=~/.ssh/Ansible_SSH_key
 ios01 ansible_host=172.16.0.14
 
 #Mikrotik
