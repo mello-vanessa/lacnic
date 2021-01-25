@@ -95,11 +95,11 @@
   ignore_errors: yes
   register: CheckfiltroInterfaceV4
   
- - name: Verificar se filtro BOGONS v6 existe
-   routeros_command:
-     commands:
-     - /ipv6 firewall filter print
-     wait_for: result[0] contains FILTRO-BOGONS-V6
+- name: Verificar se filtro BOGONS v6 existe
+  routeros_command:
+    commands:
+    - /ipv6 firewall filter print
+    wait_for: result[0] contains FILTRO-BOGONS-V6
   ignore_errors: yes
   register: checkFiltroInterfaceV6
   
