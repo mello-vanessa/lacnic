@@ -81,7 +81,7 @@
   register: checkMndp
   
  - name: Desabilitar MNDP
-  routeros_command:
+   routeros_command:
     commands:
     - /ip neighbor discovery-settings set discover-interface-list=none
   when: checkMndp is succeeded
@@ -95,22 +95,22 @@
   ignore_errors: yes
   register: CheckfiltroInterfaceV4
   
-  - name: Verificar se filtro BOGONS v6 existe
-  routeros_command:
-    commands:
-    - /ipv6 firewall filter print
-    wait_for: result[0] contains FILTRO-BOGONS-V6
+ - name: Verificar se filtro BOGONS v6 existe
+   routeros_command:
+     commands:
+     - /ipv6 firewall filter print
+     wait_for: result[0] contains FILTRO-BOGONS-V6
   ignore_errors: yes
   register: checkFiltroInterfaceV6
   
-  - name: Configurar filtro BOGONS v4
+- name: Configurar filtro BOGONS v4
   routeros_command:
     commands:
     - /ip firewall filter add action=drop chain=forward comment="Aplicando filtro de enderecos Bogons a interface" in-interface={{ Interfacev4 }} src-address-list=FILTRO-BOGONS-V4
   when: checkFiltroInterfaceV4 is failed
   register: fltroInterfaceV4
   
-  - name: Configurar filtro BOGONS v6
+- name: Configurar filtro BOGONS v6
   routeros_command:
     commands:
     - /ipv6 firewall filter add action=drop chain=forward in-interface={{ Interfacev6 }} src-address={{ PrefixoV6 }}
