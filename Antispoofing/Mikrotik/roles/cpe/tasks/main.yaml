@@ -93,7 +93,7 @@
     - /ip firewall filter print
     wait_for: result[0] contains FILTRO-BOGONS-V4
   ignore_errors: yes
-  register: CheckfiltroInterfaceV4
+  register: checkfiltroInterfaceV4
   
 - name: Verificar se filtro BOGONS v6 existe
   routeros_command:
@@ -107,13 +107,29 @@
   routeros_command:
     commands:
     - /ip firewall filter add action=drop chain=forward comment="Aplicando filtro de enderecos Bogons a interface" in-interface={{ Interfacev4 }} src-address-list=FILTRO-BOGONS-V4
-  when: checkFiltroInterfaceV4 is failed
-  register: fltroInterfaceV4
+  when: checkfiltroInterfaceV4 is failed
+  register: filtroInterfaceV4
   
 - name: Configurar filtro BOGONS v6
   routeros_command:
     commands:
     - /ipv6 firewall filter add action=drop chain=forward in-interface={{ Interfacev6 }} src-address={{ PrefixoV6 }}
-    - /ipv6 firewall filter chain=forward in-interface={{ Interfacev6 }} src-address-list=FILTRO-BOGONS-V4
+    - /ipv6 firewall filter add chain=forward in-interface={{ Interfacev6 }} src-address-list=FILTRO-BOGONS-V4
   when: checkFiltroInterfaceV6 is failed
   register: filtroInterfaceV6
+
+- name: Verificar se RP Filter está ativado
+  routeros_command:
+    commands: 
+    - /ip settings print
+    wait_for: result[0] contains strict
+  ignore_errors: yes
+  register: checkRpfilter
+
+- name: Ativar RP Filter
+  routeros_command:
+    commands: 
+    - /ip settings set rp-filter=strict
+  when: checkRpfilter is failed
+  register: rpfilterAtivado
+
