@@ -80,8 +80,8 @@
   ignore_errors: yes
   register: checkMndp
   
- - name: Desabilitar MNDP
-   routeros_command:
+- name: Desabilitar MNDP
+  routeros_command:
     commands:
     - /ip neighbor discovery-settings set discover-interface-list=none
   when: checkMndp is succeeded
