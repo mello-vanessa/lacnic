@@ -1,2 +1,2 @@
 # Antispoofing
-Scripts para automação do Antispoofing em CPE´s e PE´s em Juniper
+Scripts para automação do Antispoofing em CPE´s em Juniper
