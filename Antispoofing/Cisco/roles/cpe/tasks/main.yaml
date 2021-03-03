@@ -1,5 +1,5 @@
 ---
-- name: Checa se CEF está ativo
+- name: Checa se CEF não está ativo
   cisco.ios.ios_command:
     commands:
     - show ip cef
