@@ -1,5 +1,5 @@
 ---
-- name: Checa se a prefix-list v4 já existe
+- name: Check if the prefix-list v4 already exists
   junos_command:
     commands: show configuration policy-options
     wait_for: result[0] contains FILTRO-BOGONS-v4
@@ -7,7 +7,7 @@
   ignore_errors: yes
   register: checkFiltroBogonsv4
 
-- name: Checa se a prefix-list v6 accept já existe
+- name: Check if prefix-list v6 accept already exists
   junos_command:
     commands: show configuration policy-options
     wait_for: result[0] contains FILTRO-BOGONS-v6-ACCEPT
@@ -15,7 +15,7 @@
   ignore_errors: yes
   register: checkFiltroBogonsv6Accept
 
-- name: Checa se a prefix-list v6 deny já existe
+- name: Check if prefix-list v6 deny already exists
   junos_command:  
     commands: show configuration policy-options  
     wait_for: result[0] contains FILTRO-BOGONS-v6-DENY
@@ -23,17 +23,17 @@
   ignore_errors: yes
   register: checkFiltroBogonsv6Deny
 
-- name: Incluir task scp 
+- name: Include task scp 
   include_tasks: scp.yaml
  
-- name: Criar prefix-list BOGONS v4
+- name: Create prefix-list BOGONS v4
   junos_config:
     src: bogons-v4.j2
     src_format: set
   when: uploadBogonv4.changed
   register: setBogonV4
  
-- name: Criar prefix-list BOGONS v6
+- name: Create prefix-list BOGONS v6
   junos_config:
     src: bogons-v6.j2
     src_format: set
@@ -41,7 +41,7 @@
   register: setBogonV6
 
 # Filtro de proteção porta 25, bogons
-- name: Criar filtro de firewall v4
+- name: Create firewall filter v4
   junos_config: 
     lines:
       - set firewall family inet filter FILTRO-v4 term 1 from address 0.0.0.0/0 
@@ -54,7 +54,7 @@
   when: setBogonV4 is succeeded and setBogonV4 is changed
   register: criaFiltroFirewallv4
 
-- name: Criar filtro de firewall v6
+- name: Create firewall filter v6
   junos_config: 
     lines:
       - set firewall family inet6 filter FILTRO-v6 term 1 from address ::/0
@@ -70,7 +70,7 @@
   register: criaFiltroFirewallv6
 
 # Criar task de idempotencia se já existe na interface essas configs - testar flag de interface defined
-- name: Incluir filtro de firewall na interface
+- name: Include firewall filter in interface
   junos_config:
     lines:
       - set interfaces "{{ Interfacev4 }}" unit "{{ Unitv4 }}" family inet filter input FILTRO-v4
@@ -80,7 +80,7 @@
   when: criaFiltroFirewallv4 and criaFiltroFirewallv6 is changed and Interfacev4 is defined and Interfacev6 is defined
   register: interfaceFirewall
 
-- name: Rollback das configurações
+- name: Rollback
   junos_config:
     rollback: 0
   when: interfaceFirewall is failed
