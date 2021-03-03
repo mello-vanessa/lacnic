@@ -24,7 +24,7 @@
   when: checkRoteamentov6 is failed
   register: ativaRoteamentoIpv6
 
-- name: Checa se CEF v6 está ativo
+- name: Checa se CEF v6 não está ativo
   cisco.ios.ios_command:
     commands: 
     - show ipv6 cef
