@@ -40,7 +40,6 @@
   when: uploadBogonv6.changed
   register: setBogonV6
 
-# Filtro de proteção porta 25, bogons
 - name: Create firewall filter v4
   junos_config: 
     lines:
@@ -69,7 +68,6 @@
   when: setBogonV6 is succeeded and setBogonV6 is changed
   register: criaFiltroFirewallv6
 
-# Criar task de idempotencia se já existe na interface essas configs - testar flag de interface defined
 - name: Include firewall filter in interface
   junos_config:
     lines:
