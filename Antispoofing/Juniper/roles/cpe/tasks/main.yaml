@@ -80,7 +80,3 @@
   when: criaFiltroFirewallv4 and criaFiltroFirewallv6 is changed and Interfacev4 is defined and Interfacev6 is defined
   register: interfaceFirewall
 
-- name: Rollback
-  junos_config:
-    rollback: 0
-  when: interfaceFirewall is failed
