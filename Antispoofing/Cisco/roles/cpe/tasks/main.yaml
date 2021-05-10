@@ -1,5 +1,5 @@
 ---
-- name: Checa se CEF não está ativo
+- name: Check if CEF is disable
   cisco.ios.ios_command:
     commands:
     - show ip cef
@@ -8,7 +8,7 @@
   ignore_errors: yes
   register: checkCefv4
 
-- name: Verifica se roteamento IPv6 está ativo
+- name: Verify if IPv6 routing is active
   cisco.ios.ios_command:
     commands:
     - show running-config | include unicast
@@ -17,14 +17,14 @@
   ignore_errors: yes
   register: checkRoteamentov6
 
-- name: Ativa roteamento IPv6
+- name: Activate unicast routinh IPv6
   cisco.ios.ios_config:
     lines:
     - ipv6 unicast-routing
   when: checkRoteamentov6 is failed
   register: ativaRoteamentoIpv6
 
-- name: Checa se CEF v6 não está ativo
+- name: Check if CEF v6 is disable
   cisco.ios.ios_command:
     commands: 
     - show ipv6 cef
@@ -33,21 +33,21 @@
   ignore_errors: yes
   register: checkCefv6
 
-- name: Ativar o CEF IPv4
+- name:Activate CEF IPv4
   cisco.ios.ios_config:
     lines:
     - ip cef
   when: checkCefv4 is not failed
   register: configCefIpv4
 
-- name: Ativar o CEF IPv6
+- name: Activate CEF IPv6
   cisco.ios.ios_config:
     lines:
     - ipv6 cef
   when: checkCefv6 is not failed
   register: configCefIpv6
 
-- name: Verificar se a access-list de Filtro v4 existe
+- name: Verify if ACL v4 exists
   cisco.ios.ios_command:
     commands:
     - show ip access-lists | include FILTRO-BOGONS-V4
@@ -56,8 +56,7 @@
   ignore_errors: yes
   register: checkFiltroBogonsv4
 
-
-- name: Verificar se a access-list de Filtro v6 existe
+- name: Verify if ACL v6 exists
   cisco.ios.ios_command:
     commands:
     - show ipv6 access-list | include FILTRO-BOGONS-V6
@@ -66,7 +65,7 @@
   ignore_errors: yes
   register: checkFiltroBogonsv6
 
-- name: Criar access list BOGONS v4
+- name: Create ACL BOGONS v4
   cisco.ios.ios_config:
     lines:
     - ip access-list extended FILTRO-BOGONS-V4
@@ -88,7 +87,7 @@
   when: checkFiltroBogonsv4 is failed
   register: filtroBogonsv4
 
-- name: Criar access list BOGONS v6
+- name: Create ACL BOGONS v6
   cisco.ios.ios_config:
     lines:
     - ipv6 access-list FILTRO-BOGONS-V6
@@ -101,8 +100,7 @@
   when: checkFiltroBogonsv6 is failed
   register: filtroBogonsv6
 
-# Falta ver se já existe essas configs - idempotencia
-- name: IPv4 - Configurar filtros na interface bloqueio SMTP, CDP
+- name: IPv4 - Configure filters on interface - block port 25, CDP.
   cisco.ios.ios_config:
     lines:
       - ip access-group FILTRO-BOGONS-V4 in
@@ -111,8 +109,7 @@
     parents: interface ethernet 0/1
   when: filtroBogonsv4 is changed
 
-# Falta ver se já existe essas configs - idempotencia
-- name: IPv6 - Configurar filtros na interface, bloqueio SMTP, CDP, RA IPv6
+- name: IPv6 - Configure filters on interface, block port 25, CDP, RA IPv6
   cisco.ios.ios_config:
     lines:
       - ipv6 traffic-filter FILTRO-BOGONS-V6 in
