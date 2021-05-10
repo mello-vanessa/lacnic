@@ -1,5 +1,5 @@
 ---
-- name: Verificar se a access-list de Filtro v4 existe
+- name: Verify if access-list de Filtro v4 exists
   routeros_command:
     commands:
       - /ip firewall address-list print
@@ -7,7 +7,7 @@
   ignore_errors: yes
   register: checkFiltroBogonsv4
 
-- name: Verificar se a access-list de Filtro v6 existe
+- name: Verify if access-list de Filtro v6 exists
   routeros_command:
     commands:
     - /ipv6 firewall address-list print 
@@ -15,7 +15,7 @@
   ignore_errors: yes
   register: checkFiltroBogonsv6
 
-- name: Criar access list BOGONS v4
+- name: Create ACL BOGONS v4
   routeros_command:
     commands:
     - /ip firewall address-list add address=10.0.0.0/8 list=FILTRO-BOGONS-V4
@@ -33,7 +33,7 @@
   when: checkFiltroBogonsv4 is failed
   register: filtroBogonsv4
 
-- name: Criar access list BOGONS v6
+- name: Create access list BOGONS v6
   routeros_command:
     commands:
     - /ipv6 firewall address-list add address=2000::/3 list=FILTRO-BOGONS-V6
@@ -42,7 +42,7 @@
   when: checkFiltroBogonsv6 is failed
   register: filtroBogonsv6
 
-- name: Verificar se filtro SMTP v4 existe
+- name: Verify if SMTP filter v4 exists
   routeros_command:
     commands:
     - /ip firewall filter print
@@ -50,7 +50,7 @@
   ignore_errors: yes
   register: checkSmtpV4
   
-- name: Verificar se filtro SMTP v6 existe
+- name: Verify if SMTP v6 exists
   routeros_command:
     commands:
     - /ipv6 firewall filter print
@@ -58,21 +58,21 @@
   ignore_errors: yes
   register: checkSmtpV6
 
-- name: Configurar bloqueio SMTP v4
+- name: Configure block port 25
   routeros_command:
     commands:
     - /ip firewall filter add chain=forward action=drop src-address=0.0.0.0/0 dst-address=0.0.0.0/0 dst-port=25 protocol=tcp in-interface={{ Interfacev4 }}
   when: checkSmtpV4 is failed
   register: SmtpIpv4
   
-- name: Configurar bloqueio SMTP v6
+- name: Configure block port 25 v6
   routeros_command:
     commands:
     - /ipv6 firewall filter add chain=forward action=drop src-address=::/0 dst-address=::/0 dst-port=25 protocol=tcp in-interface={{ Interfacev6 }}
   when: checkSmtpV6 is failed
   register: SmtpIpv6
   
-- name: Verificar se MNDP está ativo
+- name: Verify if MNDP is enabled
   routeros_command:
     commands:
     - /ip neighbor discovery-settings print
@@ -80,14 +80,14 @@
   ignore_errors: yes
   register: checkMndp
   
-- name: Desabilitar MNDP
+- name: Disabled MNDP
   routeros_command:
     commands:
     - /ip neighbor discovery-settings set discover-interface-list=none
   when: checkMndp is succeeded
   register: disableMndp 
 
-- name: Verificar se filtro BOGONS v4 existe
+- name: Verify if BOGONS v4 exists
   routeros_command:
     commands:
     - /ip firewall filter print
@@ -95,7 +95,7 @@
   ignore_errors: yes
   register: checkfiltroInterfaceV4
   
-- name: Verificar se filtro BOGONS v6 existe
+- name: Verify if BOGONS v6 exists
   routeros_command:
     commands:
     - /ipv6 firewall filter print
@@ -103,14 +103,14 @@
   ignore_errors: yes
   register: checkFiltroInterfaceV6
   
-- name: Configurar filtro BOGONS v4
+- name: Configure BOGONS v4
   routeros_command:
     commands:
     - /ip firewall filter add action=drop chain=forward comment="Aplicando filtro de enderecos Bogons a interface" in-interface={{ Interfacev4 }} src-address-list=FILTRO-BOGONS-V4
   when: checkfiltroInterfaceV4 is failed
   register: filtroInterfaceV4
   
-- name: Configurar filtro BOGONS v6
+- name: Configure BOGONS v6
   routeros_command:
     commands:
     - /ipv6 firewall filter add action=drop chain=forward in-interface={{ Interfacev6 }} src-address={{ PrefixoV6 }}
@@ -118,7 +118,7 @@
   when: checkFiltroInterfaceV6 is failed
   register: filtroInterfaceV6
 
-- name: Verificar se RP Filter está ativado
+- name: Verify if RP Filter is enabled
   routeros_command:
     commands: 
     - /ip settings print
@@ -126,7 +126,7 @@
   ignore_errors: yes
   register: checkRpfilter
 
-- name: Ativar RP Filter
+- name: Enable RP Filter
   routeros_command:
     commands: 
     - /ip settings set rp-filter=strict
