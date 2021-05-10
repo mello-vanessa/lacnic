@@ -1,5 +1,6 @@
 # Lacnic
-Automatización de redes: Idempotencia en la configuración de un AS
+Network automation: Idempotency in the configuration of an AS
 
-## Exemplo de execução
+
+## Example
 ansible-playbook -i Antispoofing/inventory/hosts Antispoofing/Juniper/cpe/main.yaml
