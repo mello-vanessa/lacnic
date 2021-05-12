@@ -1,2 +1,2 @@
 # NXOS
-Scripts para automação no sistema operacional NXOS - Cisco
+Automation scripts: NXOS - Cisco
